@@ -302,7 +302,11 @@ body::-webkit-scrollbar-track {
 }
 
 #file-input {
-    display: none;
+  position: absolute;
+  left: -9999px;
+  width: 0;
+  height: 0;
+  opacity: 0;
 }
 
 .album-art-container {
