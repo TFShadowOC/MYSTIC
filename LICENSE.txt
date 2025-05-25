@@ -1,0 +1,30 @@
+Licencia Personalizada para “MYSTIC” / Custom License for “MYSTIC”
+
+Copyright (c) 2025 DA'VIL
+
+Este software, identificado como MYSTIC, incluyendo su código fuente, estructura, diseño, interfaz y recursos asociados, es propiedad exclusiva de DA'VIL. MYSTIC es una marca asociada exclusivamente a su autor.
+
+This software, identified as MYSTIC, including its source code, structure, design, interface, and associated resources, is the exclusive property of DA'VIL. MYSTIC is a trademark exclusively associated with its author.
+
+Restricciones de uso / Usage Restrictions:
+
+- Queda prohibida la copia, redistribución, modificación, sublicencia, venta o publicación del código o cualquier parte del mismo sin el consentimiento expreso y por escrito de DA'VIL.  
+- Copying, redistribution, modification, sublicensing, sale, or publication of the code or any part thereof is prohibited without the express written consent of DA'VIL.
+
+- Queda prohibida la utilización del software para desarrollo comercial, educativo o recreativo por terceros.  
+- The use of the software for commercial, educational, or recreational development by third parties is prohibited.
+
+- Queda prohibido el uso de la marca MYSTIC en productos derivados, servicios, plataformas o materiales de cualquier tipo sin autorización del titular.  
+- The use of the MYSTIC trademark on derivative products, services, platforms, or any materials without authorization from the owner is prohibited.
+
+Autorización limitada / Limited Authorization:
+
+El uso del software está permitido únicamente al autor original (DA'VIL) o a personas a quienes él otorgue una licencia explícita y personal.
+
+Use of the software is only permitted by the original author (DA'VIL) or by persons to whom he grants an explicit and personal license.
+
+Ausencia de garantía / Disclaimer:
+
+Este software se proporciona “tal cual”, sin garantías de ningún tipo, ya sean expresas o implícitas. El autor no será responsable por daños o perjuicios derivados del uso, mal uso o imposibilidad de uso de este software.
+
+This software is provided “as is”, without any warranties, express or implied. The author shall not be held liable for any damages resulting from the use, misuse, or inability to use this software.
