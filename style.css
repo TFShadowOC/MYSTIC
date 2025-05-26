@@ -63,7 +63,7 @@ body::-webkit-scrollbar-track {
     box-shadow: 0 0 10px #000;
     text-align: center;
     height: auto;
-    width: 500px;
+    width: 450px;
     position: relative;
     background-color: rgba(var(--theme-color), 0.1);
     border: 2px solid rgb(var(--theme-color));
