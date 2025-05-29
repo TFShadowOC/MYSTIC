@@ -9,7 +9,7 @@ const progressBar = document.getElementById("progress-bar");
 const toggleRepeat = document.getElementById("toggle-repeat");
 const repeatIcon = document.getElementById("repeat-icon");
 const repeatNumber = document.getElementById("repeat-number");
-const shuffleBtn = document.getElementById("toggle-shuffle");
+const toggleShuffle = document.getElementById("toggle-shuffle"); // Renombrado de shuffleBtn
 const shuffleIcon = document.getElementById("shuffle-icon");
 const currentTimeDisplay = document.getElementById("current-time");
 const totalDurationDisplay = document.getElementById("total-duration");
@@ -34,8 +34,10 @@ setTimeout(() => playerContainer.classList.remove("loading"), 500);
 let songList = [];
 let currentSongIndex = 0;
 let previousUrl = null;
-let repeatMode = 0;
-let shuffle = false;
+let repeatMode = 0; // 0: off, 1: repeat all, 2: repeat one
+let shuffleMode = false; // Renombrado de 'shuffle' a 'shuffleMode'
+let playedSongIndexes = []; // Para evitar repetición inmediata en shuffle
+let secondaryDominantColor = null;
 
 localStorage.setItem("lastIndex", currentSongIndex);
 
@@ -126,7 +128,7 @@ function loadSong(index) {
       if (tag.tags.lyrics && tag.tags.lyrics.text) {
       showLyrics(tag.tags.lyrics.text);
       } else {
-      fetchLyricsFromLibraries(song); // Busca online si no hay en metadata
+      fetchLyricsFromLibraries(song);
       } 
 
       // Process album art
@@ -250,8 +252,13 @@ audioPlayer.addEventListener("pause", () => updateIcons(false));
 // Next n previous song
 nextBtn.addEventListener("click", () => {
   if (songList.length === 0) return;
-  currentSongIndex = (currentSongIndex + 1) % songList.length;
-  loadSong(currentSongIndex);
+  // Si está en modo shuffle, el botón de siguiente también debería ir a una canción aleatoria
+  if (shuffleMode) {
+      playRandomSong();
+  } else {
+      currentSongIndex = (currentSongIndex + 1) % songList.length;
+      loadSong(currentSongIndex);
+  }
 });
 
 prevBtn.addEventListener("click", () => {
@@ -266,44 +273,54 @@ toggleRepeat.addEventListener("click", () => {
   updateToggleRepeat();
 });
 
+toggleShuffle.addEventListener("click", () => {
+    shuffleMode = !shuffleMode; // Invierte el estado de shuffleMode
+    updateToggleShuffle(); 
+    // Opcional: Si el modo shuffle se activa o desactiva, limpiar el historial
+    playedSongIndexes = []; 
+});
+
+
 function updateToggleRepeat() {
    switch (repeatMode) {
     case 0: // Repeat Off
-      repeatIcon.setAttribute("data-lucide", "repeat");
+      repeatIcon.classList.add("bi-repeat"); 
+      repeatIcon.classList.remove("bi-repeat-1"); 
       toggleRepeat.style.opacity = 0.5;
       repeatNumber.style.animation = "fadeZoomOut 0.8s forwards";
       setTimeout(() => repeatNumber.style.display = "none", 300);
       break;
     case 1: // Repeat All
-      repeatIcon.setAttribute("data-lucide", "repeat");
+      repeatIcon.classList.add("bi-repeat");
+      repeatIcon.classList.remove("bi-repeat-1"); 
       toggleRepeat.style.opacity = 1;
       repeatNumber.style.animation = "fadeZoomOut 0.8s forwards";
       setTimeout(() => repeatNumber.style.display = "none", 300);
       break;
     case 2: // Repeat One
-      repeatIcon.setAttribute("data-lucide", "repeat");
+      repeatIcon.classList.remove("bi-repeat");
+      repeatIcon.classList.add("bi-repeat-1"); 
       toggleRepeat.style.opacity = 1;
       repeatNumber.style.display = "flex";
-      repeatNumber.style.animation = "fadeZoomOut 0.8s forwards";
+      repeatNumber.style.animation = "fadeZoomIn 0.8s forwards"; // Asegúrate de tener esta animación en CSS
       break;
   }
-  lucide.createIcons();
 }
 
 audioPlayer.addEventListener("ended", handleTrackEnd);
 
-shuffleBtn.addEventListener("click", () => {
-  shuffle = !shuffle;
+function updateToggleShuffle() {
+    if (shuffleMode) {
+        toggleShuffle.style.opacity = 1; // Botón resaltado si está activo
+        // Si tienes un ícono de Lucide para "shuffle" que cambia con el estado, puedes hacerlo aquí
+        shuffleIcon.setAttribute("data-lucide", "shuffle"); // Asegúrate de que este es el ícono deseado para activo
+    } else {
+        toggleShuffle.style.opacity = 0.5; // Botón atenuado si está inactivo
+        shuffleIcon.setAttribute("data-lucide", "shuffle"); // Asegúrate de que este es el ícono deseado para inactivo
+    }
+    lucide.createIcons(); // Vuelve a renderizar el ícono de Lucide para shuffle
+}
 
-  // Opcional: cambiar estilo visual (opacidad)
-  shuffleBtn.style.opacity = shuffle ? 1 : 0.5;
-
-  // Re-asignar el ícono por si quieres diferenciar (aunque lucide solo tiene uno)
-  shuffleIcon.setAttribute("data-lucide", "shuffle");
-
-  // Re-renderizar el ícono actualizado
-  lucide.createIcons();
-});
 
 function formatTime(seconds) {
   if (isNaN(seconds) || seconds < 0) {
@@ -318,7 +335,7 @@ function formatTime(seconds) {
 function handleTrackEnd() {
   if (repeatMode === 2) {
     repeatCurrentSong();
-  } else if (shuffle) {
+  } else if (shuffleMode) { // Usa shuffleMode
     playRandomSong();
   } else if (hasNextSong()) {
     playNextSong();
@@ -342,10 +359,32 @@ function playNextSong() {
 }
 
 function playRandomSong() {
+  if (songList.length === 0) return;
+
   let nextIndex;
-  do {
-    nextIndex = Math.floor(Math.random() * songList.length);
-  } while (nextIndex === currentSongIndex && songList.length > 1);
+  // Si solo hay una canción, no hay necesidad de shuffle
+  if (songList.length <= 1) {
+    nextIndex = 0;
+  } else {
+    // Asegura que la siguiente canción aleatoria no sea la misma que la actual
+    // y que intentemos no repetir canciones inmediatamente.
+    do {
+      nextIndex = Math.floor(Math.random() * songList.length);
+    } while (nextIndex === currentSongIndex || playedSongIndexes.includes(nextIndex));
+
+    // Añadir la canción actual al historial
+    playedSongIndexes.push(currentSongIndex);
+
+    // Mantener el historial limitado (por ejemplo, a la mitad de la lista o 50% de las canciones)
+    // para evitar que se haga demasiado grande y para permitir que las canciones se repitan eventualmente.
+    if (playedSongIndexes.length > Math.floor(songList.length / 2) && songList.length > 2) {
+        // Eliminar las canciones más antiguas del historial
+        playedSongIndexes.shift(); 
+    } else if (playedSongIndexes.length > songList.length - 1) { // Si ya hemos reproducido casi todas las canciones
+        playedSongIndexes = []; // Reiniciar el historial completamente
+    }
+  }
+
   currentSongIndex = nextIndex;
   loadSong(currentSongIndex);
 }
@@ -371,30 +410,37 @@ function updateSongList() {
   songList.forEach((song, index) => {
     const tr = document.createElement("tr");
   
-  tr.addEventListener("click", () => {
-  currentSongIndex = index;
-  loadSong(currentSongIndex);
-  });
+    tr.addEventListener("click", () => {
+        currentSongIndex = index;
+        loadSong(currentSongIndex);
+    });
 
-  if (index === currentSongIndex) {
-  tr.classList.add("active");
-  } else {
-  tr.classList.remove("active");
-  }
+    if (index === currentSongIndex) {
+        tr.classList.add("active");
+    } else {
+        tr.classList.remove("active");
+    }
 
     // Number
     const tdIndex = document.createElement("td");
     tdIndex.textContent = index + 1;
     tr.appendChild(tdIndex);
 
-    // Title
-    const tdTitle = document.createElement("td");
-    tdTitle.textContent = song.title || song.name || song.file.name;
-    tr.appendChild(tdTitle);
-    // Artist
-    const tdArtist = document.createElement("td");
-    tdArtist.textContent = song.artist || "-";
-    tr.appendChild(tdArtist);
+    // Title and Artist combined
+    const tdTitleArtist = document.createElement("td");
+    const titleSpan = document.createElement("span");
+    titleSpan.classList.add("list-song-title"); // Add a class for styling
+    titleSpan.textContent = song.title || song.name || song.file.name;
+    tdTitleArtist.appendChild(titleSpan);
+
+    if (song.artist && song.artist !== "-") { // Only add artist if available
+        const artistSpan = document.createElement("span");
+        artistSpan.classList.add("list-song-artist"); // Add a class for styling
+        artistSpan.textContent = song.artist;
+        tdTitleArtist.appendChild(document.createElement("br")); // New line
+        tdTitleArtist.appendChild(artistSpan);
+    }
+    tr.appendChild(tdTitleArtist);
 
     // Album
     const tdAlbum = document.createElement("td");
@@ -639,3 +685,9 @@ function showLyrics(lyrics) {
         lyricsText.textContent = lyrics || "No lyrics available";
     }
 }
+
+// Llama a las funciones de actualización al cargar la página para establecer el estado inicial de los íconos
+document.addEventListener("DOMContentLoaded", () => {
+    updateToggleRepeat();
+    updateToggleShuffle(); 
+});

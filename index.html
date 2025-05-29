@@ -3,9 +3,10 @@
 <head>
     <link rel="icon" href="data:,">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <title>MYSTIC</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
 </head>
@@ -19,18 +20,19 @@
         <!-- Cover image -->
         <div class="album-art-container">
         <img id="album-art" src="https://placehold.co/200x200?text=No+Cover" alt="Album Art" crossorigin= "anonymous"/>
-            <div id="lyrics-overlay">
-            <button id="close-lyrics">
-                <i id="close-icon" data-lucide="x"></i>
-            </button>
-            <p id="lyrics-text">No lyrics available</p>
-            </div>
         </div>
 
         <!-- SONG INFO -->
         <div class="song-info">
             <p id="song-title" class="song-title">Sin canciones cargadas</p>
             <p id="song-artist" class="song-artist"></p>
+        </div>
+
+        <!-- LYRICS -->
+        <div class="lyrics">
+            <button id="turn-lyrics">
+                <i id="lyrics-icon" data-lucide="mic-vocal"></i>
+            </button>
         </div>
 
         <!-- CONTROLS -->
@@ -66,26 +68,22 @@
         <!-- Repeat n Shuffle -->
         <div class="mode-controls">
             <button id="toggle-repeat" style="opacity: 0.5;">
-                <i id="repeat-icon" data-lucide="repeat"></i>
-                <span id="repeat-number" style="display: none; position: absolute; top: 4px; right: 4px; font-size: 10px; color: var(--theme-color); font-weight: bold;">1</span>
+                <i id="repeat-icon" class="bi bi-repeat" style="font-size: 24px; font-weight: bold;"></i>
             </button>
             <button id="toggle-shuffle">
-                <i id="shuffle-icon" data-lucide="shuffle"></i>
+                <i id="shuffle-icon" class="bi bi-shuffle" style="font-size: 24px; font-weight: bold;"></i>
             </button>
         </div>
         
         <!-- Hide audio element -->
             <audio id="audio-player" controls hidden></audio>
 
-        <!-- LYRICS -->
-         <div class="lyrics">
-            <button id="turn-lyrics">
-                <i id="lyrics-icon" data-lucide="mic-vocal"></i>
+        <div id="lyrics-overlay">
+            <button id="close-lyrics">
+                <i id="close-icon" data-lucide="x"></i>
             </button>
-         </div>
-
-        
-
+            <p id="lyrics-text">No lyrics available</p>
+        </div>
     </div>
 
     <!-- Song List -->
@@ -94,8 +92,7 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Title</th>
-                    <th>Artist</th>
+                    <th>Title / Artist</th>
                     <th>Album</th>
                     <th>Duration</th>
                     <th>Format</th>
