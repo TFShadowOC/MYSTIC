@@ -18,15 +18,24 @@ const blurBackground = document.getElementById("blur-background");
 const colorThief = new ColorThief();
 const playerContainer = document.querySelector(".player-container");
 const songArtist = document.getElementById("song-artist");
-const volumeSlider = document.createElement('input');
-const supportedFormats = ["audio/mpeg", "audio/wav", "audio/ogg", "audio/mp3", "audio/flac", "audio/aac"];
+const volumeSlider = document.createElement("input");
+const supportedFormats = [
+  "audio/mpeg",
+  "audio/wav",
+  "audio/ogg",
+  "audio/mp3",
+  "audio/flac",
+  "audio/aac",
+];
 const songListBody = document.querySelector("#song-list-body");
 const lyricsOverlay = document.getElementById("lyrics-overlay");
+const lyricsContainer = document.getElementById("lyrics-container");
+const lyricsTextElement = document.getElementById("lyrics-text");
 const lyricsIcon = document.getElementById("lyrics-icon");
 const lyricsBtn = document.getElementById("turn-lyrics");
 const closeLyricsBtn = document.getElementById("close-lyrics");
 
-lucide.createIcons(); 
+lucide.createIcons();
 
 playerContainer.classList.add("loading");
 setTimeout(() => playerContainer.classList.remove("loading"), 500);
@@ -38,6 +47,8 @@ let repeatMode = 0; // 0: off, 1: repeat all, 2: repeat one
 let shuffleMode = false; // Renombrado de 'shuffle' a 'shuffleMode'
 let playedSongIndexes = []; // Para evitar repetición inmediata en shuffle
 let secondaryDominantColor = null;
+let currentLRC = [];
+let currentLyricIndex = -1;
 
 localStorage.setItem("lastIndex", currentSongIndex);
 
@@ -55,7 +66,7 @@ albumArt.onerror = function () {
 
 // Convert ArrayBuffer to Base64
 function arrayBufferToBase64(buffer) {
-  let binary = '';
+  let binary = "";
   const bytes = new Uint8Array(buffer);
   const len = bytes.byteLength;
   for (let i = 0; i < len; i++) {
@@ -66,20 +77,22 @@ function arrayBufferToBase64(buffer) {
 
 // Load multiple songs
 fileInput.addEventListener("change", function () {
-  const files = Array.from(this.files).filter(file => supportedFormats.includes(file.type));
+  const files = Array.from(this.files).filter((file) =>
+    supportedFormats.includes(file.type),
+  );
   if (files.length === 0) {
     alert("No compatible audio files found");
     return;
   }
 
-  songList = files.map(file => ({
+  songList = files.map((file) => ({
     file: file,
     name: file.name.replace(/\.[^/._]+$/, ""),
     title: null,
     artist: null,
     album: null,
     duration: null,
-    durationFormatted: null
+    durationFormatted: null,
   }));
 
   currentSongIndex = 0;
@@ -110,7 +123,7 @@ function loadSong(index) {
   // Reset image before loading new one
   albumArt.style.opacity = 0;
   albumArt.src = "https://placehold.co/200x200?text=Loading...";
-  
+
   window.jsmediatags.read(song.file, {
     onSuccess: function (tag) {
       console.log("Tags:", tag.tags);
@@ -126,28 +139,28 @@ function loadSong(index) {
       }
 
       if (tag.tags.lyrics && tag.tags.lyrics.text) {
-      showLyrics(tag.tags.lyrics.text);
+        showLyrics(tag.tags.lyrics.text);
       } else {
-      fetchLyricsFromLibraries(song);
-      } 
+        fetchLyricsFromLibraries(song);
+      }
 
       // Process album art
       if (tag.tags.picture) {
         const picture = tag.tags.picture;
         const base64String = arrayBufferToBase64(picture.data);
         const imageUri = `data:${picture.format};base64,${base64String}`;
-        
+
         // Create a temporary image to extract the color
         const tempImage = new Image();
         tempImage.crossOrigin = "Anonymous";
-        
-        tempImage.onload = function() {
+
+        tempImage.onload = function () {
           // Asign load image to album art
           albumArt.src = imageUri;
-          
+
           // Aply blur background
           blurBackground.style.backgroundImage = `url(${imageUri})`;
-          
+
           // Extract dominant color after a short delay
           setTimeout(() => {
             try {
@@ -159,28 +172,33 @@ function loadSong(index) {
             } catch (err) {
               console.error("Error extracting color:", err);
               // Fallback color
-              document.documentElement.style.setProperty("--theme-color", "74, 144, 226");
+              document.documentElement.style.setProperty(
+                "--theme-color",
+                "74, 144, 226",
+              );
             }
             // Show the album art after the background is set
             albumArt.style.opacity = 1;
           }, 100);
         };
-        
-        tempImage.onerror = function() {
+
+        tempImage.onerror = function () {
           console.error("Error loading temporary image");
           albumArt.src = "https://placehold.co/200x200?text=No+Cover";
           albumArt.style.opacity = 1;
         };
-        
+
         // Set the source of the temporary image
         tempImage.src = imageUri;
-        
       } else {
         // There's no picture, set a default image
         albumArt.src = "https://placehold.co/200x200?text=No+Cover";
         albumArt.style.opacity = 1;
         blurBackground.style.backgroundImage = "none";
-        document.documentElement.style.setProperty("--theme-color", "74, 144, 226");
+        document.documentElement.style.setProperty(
+          "--theme-color",
+          "74, 144, 226",
+        );
       }
     },
     onError: function (error) {
@@ -188,8 +206,11 @@ function loadSong(index) {
       albumArt.src = "https://placehold.co/200x200?text=No+Cover";
       albumArt.style.opacity = 1;
       blurBackground.style.backgroundImage = "none";
-      document.documentElement.style.setProperty("--theme-color", "74, 144, 226");
-    }
+      document.documentElement.style.setProperty(
+        "--theme-color",
+        "74, 144, 226",
+      );
+    },
   });
 }
 
@@ -199,7 +220,7 @@ function applyThemecolor(rgbArray) {
     console.error("Invalid RGB array:", rgbArray);
     rgbArray = [74, 144, 226]; // Default color
   }
-  
+
   const [r, g, b] = rgbArray;
   const themeColor = `${r}, ${g}, ${b}`;
   document.documentElement.style.setProperty("--theme-color", themeColor);
@@ -248,16 +269,15 @@ audioPlayer.addEventListener("pause", () => updateIcons(false));
 
 // Volume Control
 
-
 // Next n previous song
 nextBtn.addEventListener("click", () => {
   if (songList.length === 0) return;
   // Si está en modo shuffle, el botón de siguiente también debería ir a una canción aleatoria
   if (shuffleMode) {
-      playRandomSong();
+    playRandomSong();
   } else {
-      currentSongIndex = (currentSongIndex + 1) % songList.length;
-      loadSong(currentSongIndex);
+    currentSongIndex = (currentSongIndex + 1) % songList.length;
+    loadSong(currentSongIndex);
   }
 });
 
@@ -274,32 +294,31 @@ toggleRepeat.addEventListener("click", () => {
 });
 
 toggleShuffle.addEventListener("click", () => {
-    shuffleMode = !shuffleMode; // Invierte el estado de shuffleMode
-    updateToggleShuffle(); 
-    // Opcional: Si el modo shuffle se activa o desactiva, limpiar el historial
-    playedSongIndexes = []; 
+  shuffleMode = !shuffleMode; // Invierte el estado de shuffleMode
+  updateToggleShuffle();
+  // Opcional: Si el modo shuffle se activa o desactiva, limpiar el historial
+  playedSongIndexes = [];
 });
 
-
 function updateToggleRepeat() {
-   switch (repeatMode) {
+  switch (repeatMode) {
     case 0: // Repeat Off
-      repeatIcon.classList.add("bi-repeat"); 
-      repeatIcon.classList.remove("bi-repeat-1"); 
+      repeatIcon.classList.add("bi-repeat");
+      repeatIcon.classList.remove("bi-repeat-1");
       toggleRepeat.style.opacity = 0.5;
       repeatNumber.style.animation = "fadeZoomOut 0.8s forwards";
-      setTimeout(() => repeatNumber.style.display = "none", 300);
+      setTimeout(() => (repeatNumber.style.display = "none"), 300);
       break;
     case 1: // Repeat All
       repeatIcon.classList.add("bi-repeat");
-      repeatIcon.classList.remove("bi-repeat-1"); 
+      repeatIcon.classList.remove("bi-repeat-1");
       toggleRepeat.style.opacity = 1;
       repeatNumber.style.animation = "fadeZoomOut 0.8s forwards";
-      setTimeout(() => repeatNumber.style.display = "none", 300);
+      setTimeout(() => (repeatNumber.style.display = "none"), 300);
       break;
     case 2: // Repeat One
       repeatIcon.classList.remove("bi-repeat");
-      repeatIcon.classList.add("bi-repeat-1"); 
+      repeatIcon.classList.add("bi-repeat-1");
       toggleRepeat.style.opacity = 1;
       repeatNumber.style.display = "flex";
       repeatNumber.style.animation = "fadeZoomIn 0.8s forwards"; // Asegúrate de tener esta animación en CSS
@@ -310,17 +329,16 @@ function updateToggleRepeat() {
 audioPlayer.addEventListener("ended", handleTrackEnd);
 
 function updateToggleShuffle() {
-    if (shuffleMode) {
-        toggleShuffle.style.opacity = 1; // Botón resaltado si está activo
-        // Si tienes un ícono de Lucide para "shuffle" que cambia con el estado, puedes hacerlo aquí
-        shuffleIcon.setAttribute("data-lucide", "shuffle"); // Asegúrate de que este es el ícono deseado para activo
-    } else {
-        toggleShuffle.style.opacity = 0.5; // Botón atenuado si está inactivo
-        shuffleIcon.setAttribute("data-lucide", "shuffle"); // Asegúrate de que este es el ícono deseado para inactivo
-    }
-    lucide.createIcons(); // Vuelve a renderizar el ícono de Lucide para shuffle
+  if (shuffleMode) {
+    toggleShuffle.style.opacity = 1; // Botón resaltado si está activo
+    // Si tienes un ícono de Lucide para "shuffle" que cambia con el estado, puedes hacerlo aquí
+    shuffleIcon.setAttribute("data-lucide", "shuffle"); // Asegúrate de que este es el ícono deseado para activo
+  } else {
+    toggleShuffle.style.opacity = 0.5; // Botón atenuado si está inactivo
+    shuffleIcon.setAttribute("data-lucide", "shuffle"); // Asegúrate de que este es el ícono deseado para inactivo
+  }
+  lucide.createIcons(); // Vuelve a renderizar el ícono de Lucide para shuffle
 }
-
 
 function formatTime(seconds) {
   if (isNaN(seconds) || seconds < 0) {
@@ -329,13 +347,14 @@ function formatTime(seconds) {
 
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = Math.floor(seconds % 60);
-  return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+  return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
 }
 
 function handleTrackEnd() {
   if (repeatMode === 2) {
     repeatCurrentSong();
-  } else if (shuffleMode) { // Usa shuffleMode
+  } else if (shuffleMode) {
+    // Usa shuffleMode
     playRandomSong();
   } else if (hasNextSong()) {
     playNextSong();
@@ -362,26 +381,31 @@ function playRandomSong() {
   if (songList.length === 0) return;
 
   let nextIndex;
-  // Si solo hay una canción, no hay necesidad de shuffle
+ 
   if (songList.length <= 1) {
     nextIndex = 0;
   } else {
-    // Asegura que la siguiente canción aleatoria no sea la misma que la actual
-    // y que intentemos no repetir canciones inmediatamente.
     do {
       nextIndex = Math.floor(Math.random() * songList.length);
-    } while (nextIndex === currentSongIndex || playedSongIndexes.includes(nextIndex));
+    } while (
+      nextIndex === currentSongIndex ||
+      playedSongIndexes.includes(nextIndex)
+    );
 
     // Añadir la canción actual al historial
     playedSongIndexes.push(currentSongIndex);
 
     // Mantener el historial limitado (por ejemplo, a la mitad de la lista o 50% de las canciones)
     // para evitar que se haga demasiado grande y para permitir que las canciones se repitan eventualmente.
-    if (playedSongIndexes.length > Math.floor(songList.length / 2) && songList.length > 2) {
-        // Eliminar las canciones más antiguas del historial
-        playedSongIndexes.shift(); 
-    } else if (playedSongIndexes.length > songList.length - 1) { // Si ya hemos reproducido casi todas las canciones
-        playedSongIndexes = []; // Reiniciar el historial completamente
+    if (
+      playedSongIndexes.length > Math.floor(songList.length / 2) &&
+      songList.length > 2
+    ) {
+      // Eliminar las canciones más antiguas del historial
+      playedSongIndexes.shift();
+    } else if (playedSongIndexes.length > songList.length - 1) {
+      // Si ya hemos reproducido casi todas las canciones
+      playedSongIndexes = []; // Reiniciar el historial completamente
     }
   }
 
@@ -409,16 +433,16 @@ function updateSongList() {
 
   songList.forEach((song, index) => {
     const tr = document.createElement("tr");
-  
+
     tr.addEventListener("click", () => {
-        currentSongIndex = index;
-        loadSong(currentSongIndex);
+      currentSongIndex = index;
+      loadSong(currentSongIndex);
     });
 
     if (index === currentSongIndex) {
-        tr.classList.add("active");
+      tr.classList.add("active");
     } else {
-        tr.classList.remove("active");
+      tr.classList.remove("active");
     }
 
     // Number
@@ -433,12 +457,13 @@ function updateSongList() {
     titleSpan.textContent = song.title || song.name || song.file.name;
     tdTitleArtist.appendChild(titleSpan);
 
-    if (song.artist && song.artist !== "-") { // Only add artist if available
-        const artistSpan = document.createElement("span");
-        artistSpan.classList.add("list-song-artist"); // Add a class for styling
-        artistSpan.textContent = song.artist;
-        tdTitleArtist.appendChild(document.createElement("br")); // New line
-        tdTitleArtist.appendChild(artistSpan);
+    if (song.artist && song.artist !== "-") {
+      // Only add artist if available
+      const artistSpan = document.createElement("span");
+      artistSpan.classList.add("list-song-artist"); // Add a class for styling
+      artistSpan.textContent = song.artist;
+      tdTitleArtist.appendChild(document.createElement("br")); // New line
+      tdTitleArtist.appendChild(artistSpan);
     }
     tr.appendChild(tdTitleArtist);
 
@@ -449,7 +474,8 @@ function updateSongList() {
 
     // Duration
     const tdDuration = document.createElement("td");
-    tdDuration.textContent = song.durationFormatted || formatTime(song.duration);
+    tdDuration.textContent =
+      song.durationFormatted || formatTime(song.duration);
     tr.appendChild(tdDuration);
 
     // Format
@@ -464,8 +490,8 @@ function updateSongList() {
 }
 
 function addTooltips() {
-  const cells = document.querySelectorAll('#song-list td');
-  cells.forEach(cell => {
+  const cells = document.querySelectorAll("#song-list td");
+  cells.forEach((cell) => {
     if (cell.scrollWidth > cell.clientWidth) {
       cell.title = cell.textContent;
     }
@@ -474,97 +500,101 @@ function addTooltips() {
 
 function processMetadataForAllSongs() {
   songList.forEach((song, index) => {
-  // Read metadata
-  window.jsmediatags.read(song.file, {
-    onSuccess: function(tag) {
-      song.title = tag.tags.title || song.name;
-      song.artist = tag.tags.artist || "-";
-      song.album = tag.tags.album || "-";
-    // Optional
-    if (tag.tags.title) song.title = tag.tags.title;
-    updateSongList();
-  },
-  onError: function(error) {
-    song.artist = "-";
-    song.album = "-";
-    updateSongList();
-  }
-  });
+    // Read metadata
+    window.jsmediatags.read(song.file, {
+      onSuccess: function (tag) {
+        song.title = tag.tags.title || song.name;
+        song.artist = tag.tags.artist || "-";
+        song.album = tag.tags.album || "-";
+        // Optional
+        if (tag.tags.title) song.title = tag.tags.title;
+        updateSongList();
+      },
+      onError: function (error) {
+        song.artist = "-";
+        song.album = "-";
+        updateSongList();
+      },
+    });
 
-  // Read duration
-  const tempAudio = new Audio();
-  tempAudio.src = URL.createObjectURL(song.file);
-  tempAudio.addEventListener("loadedmetadata", () => {
-    song.duration = tempAudio.duration;
-    song.durationFormatted = formatTime(song.duration);
-    updateSongList();
-    URL.revokeObjectURL(tempAudio.src);
-  });
+    // Read duration
+    const tempAudio = new Audio();
+    tempAudio.src = URL.createObjectURL(song.file);
+    tempAudio.addEventListener("loadedmetadata", () => {
+      song.duration = tempAudio.duration;
+      song.durationFormatted = formatTime(song.duration);
+      updateSongList();
+      URL.revokeObjectURL(tempAudio.src);
+    });
   });
 }
 
-// Add tooltip for text 
+// Add tooltip for text
 function addTooltips() {
-    const cells = document.querySelectorAll('#song-list td');
-    cells.forEach(cell => {
-        if (cell.scrollWidth > cell.clientWidth) {
-            cell.title = cell.textContent;
-        }
-    });
+  const cells = document.querySelectorAll("#song-list td");
+  cells.forEach((cell) => {
+    if (cell.scrollWidth > cell.clientWidth) {
+      cell.title = cell.textContent;
+    }
+  });
 }
 
 // Detect device
 function isMobileDevice() {
-    return window.innerWidth <= 900 || 
-           /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  return (
+    window.innerWidth <= 900 ||
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent,
+    )
+  );
 }
 
-// Apply specific setting 
+// Apply specific setting
 function applyResponsiveBehavior() {
-    const isMobile = isMobileDevice();
-    const songListContainer = document.querySelector('.song-list-container');
-    
-    if (isMobile) {
-        songListContainer.style.overflowX = 'auto';
-    } else {
-        songListContainer.style.overflowX = 'hidden';
-    }
+  const isMobile = isMobileDevice();
+  const songListContainer = document.querySelector(".song-list-container");
+
+  if (isMobile) {
+    songListContainer.style.overflowX = "auto";
+  } else {
+    songListContainer.style.overflowX = "hidden";
+  }
 }
 
 // Execute on load
-window.addEventListener('load', applyResponsiveBehavior);
-window.addEventListener('resize', applyResponsiveBehavior);
+window.addEventListener("load", applyResponsiveBehavior);
+window.addEventListener("resize", applyResponsiveBehavior);
 
 // Lyrics
 function toggleLyrics() {
-    const isVisible = lyricsOverlay.classList.contains("visible");
+  const isVisible = lyricsOverlay.classList.contains("visible");
 
-    if (isVisible) {
-        hideLyrics();
-    } else {
-        showLyricsOverlay();
-    }
+  if (isVisible) {
+    hideLyrics();
+  } else {
+    showLyricsOverlay();
+  }
 }
 
 function showLyricsOverlay() {
-    lyricsOverlay.classList.add("visible");
-    lyricsOverlay.style.opacity = "1";
-    lyricsOverlay.style.pointerEvents = "auto";
-    lyricsIcon.setAttribute("data-lucide", "mic");
-    lucide.createIcons();
+  lyricsOverlay.classList.add("visible");
+  lyricsOverlay.style.opacity = "1";
+  lyricsOverlay.style.pointerEvents = "auto";
+  lyricsIcon.setAttribute("data-lucide", "mic");
+  lucide.createIcons();
 }
 
 function hideLyrics() {
-    lyricsOverlay.classList.remove("visible");
-    lyricsOverlay.style.opacity = "0";
-    lyricsOverlay.style.pointerEvents = "none";
-    lyricsIcon.setAttribute("data-lucide", "mic-vocal");
-    lucide.createIcons();
+  lyricsOverlay.classList.remove("visible");
+  lyricsOverlay.style.opacity = "0";
+  lyricsOverlay.style.pointerEvents = "none";
+  lyricsIcon.setAttribute("data-lucide", "mic-vocal");
+  lucide.createIcons();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    lyricsBtn.addEventListener("click", toggleLyrics);
-    closeLyricsBtn.addEventListener("click", hideLyrics);
+  lyricsBtn.addEventListener("click", toggleLyrics);
+  closeLyricsBtn.addEventListener("click", hideLyrics);
 });
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -583,41 +613,92 @@ document.addEventListener("DOMContentLoaded", () => {
       lyricsIcon.setAttribute("data-lucide", "mic");
     }
 
-  function parseLRC(lrcText) {
-    const lines = lrcText.split("\n");
-    const lrc = [];
+    function parseLRC(lrcText) {
+      const lines = lrcText.split("\n");
+      const lrc = [];
 
-    for (const line of lines) {
-        const match = line.match(/\[(\d{2}):(\d{2}(?:\.\d{2})?)\](.*)/);
-        if (match) {
-            const minutes = parseInt(match[1]);
-            const seconds = parseFloat(match[2]);
-            const time = minutes * 60 + seconds;
-            const text = match[3].trim();
+      for (const line of lines) {
+        const timestampRegex = /\[(\d{2}):(\d{2}(?:\.\d{2})?)\]/g;
+        let match;
+        const timestamps = [];
+        let lastIndex = 0;
+
+        while ((match = timestampRegex.exec(line)) !== null) {
+          const minutes = parseInt(match[1]);
+          const seconds = parseFloat(match[2]);
+          timestamps.push(minutes * 60 + seconds);
+          lastIndex = timestampRegex.lastIndex;
+        }
+
+        const text = line.substring(lastIndex).trim();
+
+        if (timestamps.length > 0) {
+          timestamps.forEach((time) => {
             lrc.push({ time, text });
+          });
+        } else if (text) {
+          lrc.push({ time: -1, text });
         }
+      }
+      lrc.sort((a, b) => a.time - b.time);
+      return lrc;
     }
-    return lrc;
-}
 
-function syncLyrics(lrcArray) {
-    const lyricsText = document.getElementById("lyrics-text");
-    
-    audioPlayer.addEventListener("timeupdate", () => {
+    function syncLyrics(lrcArray) {
+      const lyricsLines = lyricsContainer.querySelectorAll(".lyrics-line");
+      if (lyricsLines.length === 0 || currentLRC.length === 0) return;
+
+      audioPlayer.addEventListener("timeupdate", function timeUpdateHandler() {
         const currentTime = audioPlayer.currentTime;
-        const line = lrcArray.find((entry, i) =>
-            currentTime >= entry.time && (!lrcArray[i + 1] || currentTime < lrcArray[i + 1].time)
-        );
-        
-        if (line && line.text) {
-            lyricsText.textContent = line.text;
-            lyricsText.classList.add("active-line");
-            setTimeout(() => lyricsText.classList.remove("active-line"), 300);
-        }
-    });
-}
+        let nextLyricIndex = -1;
 
-    lucide.createIcons(); // Re-render icons
+        for (let i = 0; i < currentLRC.length; i++) {
+          if (currentTime >= currentLRC[i].time) {
+            if (
+              i + 1 < currentLRC.length &&
+              currentTime < currentLRC[i + 1].time
+            ) {
+              nextLyricIndex = i;
+              break;
+            } else if (i === currentLRC.length - 1) {
+              nextLyricIndex = i;
+              break;
+            }
+          }
+        }
+
+        if (nextLyricIndex !== -1 && nextLyricIndex !== currentLyricIndex) {
+          if (currentLyricIndex !== -1 && lyricsLines[currentLyricIndex]) {
+            lyricsLines[currentLyricIndex].classList.remove("active-line");
+          }
+
+          if (lyricsLines[nextLyricIndex]) {
+            lyricsLines[nextLyricIndex].classList.add("active-line");
+            currentLyricIndex = nextLyricIndex;
+
+            const activeLine = lyricsLines[currentLyricIndex];
+            if (activeLine) {
+              const containerHeight = lyricsContainer.clientHeight;
+              const lineHeight = activeLine.clientHeight;
+              const lineOffset = activeLine.offsetTop;
+
+              const scrollPos =
+                lineOffset - containerHeight / 2 + lineHeight / 2;
+              lyricsContainer.scrollTo({
+                top: scrollPos,
+                behavior: "smooth",
+              });
+            }
+          }
+        }
+      });
+    }
+
+    if (line && line.text) {
+      lyricsText.textContent = line.text;
+      lyricsText.classList.add("active-line");
+      setTimeout(() => lyricsText.classList.remove("active-line"), 300);
+    }
   });
 });
 
@@ -644,20 +725,27 @@ async function fetchLyricsFromLibraries(song) {
   const title = song.title || song.name;
   const artist = song.artist || "";
   let lyrics = "";
+  const lyricsTextElement = document.getElementById("lyrics-text");
+  lyricsTextElement.textContent = "Loading lyrics...";
+  lyricsContainer.innerHTML = "";
 
   try {
-    // Primera fuente: lyrics.ovh
-    const response1 = await fetch(`https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`);
+    // First source: lyrics.ovh
+    const response1 = await fetch(
+      `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`,
+    );
     const data1 = await response1.json();
-    if (data1 && data1.lyrics) {
+    if (response1.ok && data1 && data1.lyrics) {
       lyrics = data1.lyrics;
     }
 
-    // Segunda fuente: api.lyricsify.app (si lyrics.ovh falla)
+    // 2nd source: api.lyricsify.app
     if (!lyrics) {
-      const response2 = await fetch(`https://api.lyricsify.app/api/lyric/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`);
+      const response2 = await fetch(
+        `https://api.lyricsify.app/api/lyric/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`,
+      );
       const data2 = await response2.json();
-      if (data2?.data?.lyric) {
+      if (response2.ok && data2?.data?.lyric) {
         lyrics = data2.data.lyric;
       }
     }
@@ -669,25 +757,41 @@ async function fetchLyricsFromLibraries(song) {
     }
   } catch (error) {
     console.error("Error fetching lyrics:", error);
-    showLyrics("No se pudo obtener la letra.");
+    showLyrics("No lyrics available.");
   }
 }
 
-function showLyrics(lyrics) {
-    const lyricsText = document.getElementById("lyrics-text");
-    const isLRC = lyrics.includes("[00:");
-    
-    if (isLRC) {
-        const lrcArray = parseLRC(lyrics);
-        syncLyrics(lrcArray);
-        lyricsText.textContent = "♪ Synchronized lyrics ♪";
+function showLyrics(lyricsContent) {
+  const lyricsText = document.getElementById("lyrics-text");
+
+  lyricsContainer.innerHTML = ""; // Clear previous lyrics
+
+  const isLRCFormat =
+    lyricsContent.includes("[00:") || lyricsContent.includes("[01:");
+
+  if (isLRCFormat) {
+    currentLRC = parseLRC(lyricsContent);
+    if (currentLRC.length > 0) {
+      currentLRC.forEach((line, index) => {
+        const p = document.createElement("p");
+        p.textContent = line.text || "";
+        p.setAttribute("data-time", line.time);
+        p.classList.add("lyric-line");
+        lyricsContainer.appendChild(p);
+      });
+      syncLyrics();
     } else {
-        lyricsText.textContent = lyrics || "No lyrics available";
+      lyricsContainer.textContent = lyrics || "No lyrics available";
+      currentLRC = [];
     }
+  } else {
+    lyricsContainer.textContent = lyricsContent || "No lyrics available";
+    currentLRC = [];
+    audioPlayer.removeEventListener("timeupdate", syncLyrics);
+  }
 }
 
-// Llama a las funciones de actualización al cargar la página para establecer el estado inicial de los íconos
 document.addEventListener("DOMContentLoaded", () => {
-    updateToggleRepeat();
-    updateToggleShuffle(); 
+  updateToggleRepeat();
+  updateToggleShuffle();
 });
