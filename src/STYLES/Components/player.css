@@ -1,0 +1,140 @@
+.player-container {
+  max-width: 90vw;
+  max-height: 90vw;
+  background: #222;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  text-align: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: auto;
+  width: 450px;
+  position: relative;
+  background-color: rgba(var(--theme-color), 0.1);
+  border: 2px solid rgb(var(--theme-color));
+  box-shadow: 0 4px 20px rgba(var(--theme-color), 0.4);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.player-container.loading {
+  filter: brightness(0.7);
+  transition: filter 0.5s;
+}
+
+/* SONG INFORMATION DISPLAY */
+
+.song-title {
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin: 0.2rem 0;
+}
+
+.song-artist {
+  font-weight: normal;
+  font-size: 0.9rem;
+  color: #ccc;
+  margin: 0;
+}
+
+/* BACKGROUND BLUR EFFECT */
+
+#blur-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-position: center;
+  background-size: cover;
+  filter: blur(30px);
+  opacity: 0.3;
+  z-index: -1;
+  transition: background-image 0.5s ease-in-out;
+}
+
+/* ALBUM ART DISPLAY */
+
+.album-art-container {
+  position: relative;
+  width: 80vw;
+  height: 80vw;
+  max-width: 300px;
+  max-height: 300px;
+  margin: 50px auto;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+#album-art {
+  width: 300px;
+  height: 300px;
+  border-radius: 12px;
+  opacity: 1;
+  transition:
+    opacity 0.5s ease-in-out,
+    transform 0.3s ease;
+  object-fit: cover;
+}
+
+.album-art-container:hover #album-art {
+  transform: scale(1.05);
+}
+
+/* PROGRESS BAR AND TIME DISPLAY */
+
+#progress-bar {
+  width: 100%;
+  margin: 1rem 0 0.5rem;
+  background: transparent;
+}
+
+#progress-bar::-webkit-slider-thumb {
+  background-color: rgb(var(--theme-color));
+  border: none;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-top: -6px;
+  box-shadow: 0 0 8px rgba(var(--theme-color), 0.8);
+}
+
+#progress-bar::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--theme-color), 0.6),
+    rgba(var(--theme-color), 0.2)
+  );
+  transition: background 0.3s ease-in-out;
+}
+
+#progress-bar::-moz-range-thumb {
+  background-color: rgb(var(--theme-color));
+  border: none;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+#progress-bar::-moz-range-track {
+  background: rgba(var(--theme-color), 0.4);
+  height: 4px;
+  border-radius: 2px;
+}
+
+.time-display {
+  display: flex;
+  justify-content: center;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  color: #ccc;
+  font-family: monospace;
+}

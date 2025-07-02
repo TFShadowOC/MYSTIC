@@ -1,0 +1,32 @@
+:root {
+  --theme-color: 74, 144, 226; /* fallback */
+}
+
+html,
+body {
+  overflow-x: hidden;
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  font-family: "Courier New", Courier, monospace;
+  background: #111;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  height: auto;
+  margin: 0;
+  padding: 20px;
+}
+
+body::-webkit-scrollbar {
+  width: 8px;
+}
+
+body::-webkit-scrollbar-track {
+  background: transparent;
+}

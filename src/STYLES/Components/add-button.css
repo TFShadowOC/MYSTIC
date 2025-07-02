@@ -1,0 +1,37 @@
+.add-button-container {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+.add-button {
+  width: 40px;
+  height: 40px;
+  background-color: #ff6467;
+  color: white;
+  font-size: 24px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    rgba(255, 0, 43, 0.89) 0px 8px 24px,
+    rgba(172, 16, 16, 0.932) 0px 16px 56px,
+    rgba(30, 30, 122, 0.534) 0px 24px 80px;
+  transition: background-color 0.3s;
+  padding: 0;
+}
+
+.add-button:hover {
+  background-color: #e7000b;
+}
+
+#file-input {
+  position: absolute;
+  left: -9999px;
+  width: 0;
+  height: 0;
+  opacity: 0;
+}

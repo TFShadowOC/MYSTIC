@@ -1,0 +1,179 @@
+.song-list-container {
+  flex: 1;
+  margin: 0;
+  max-width: 750px;
+  width: 100%;
+  max-height: 625px;
+  background-color: rgba(225, 225, 225, 0.05);
+  backdrop-filter: blur(9px);
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  overflow-x: auto;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+  opacity: 1;
+  border-collapse: collapse;
+}
+
+.song-list-container::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+
+.song-list-container::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--theme-color), 0.5);
+  border-radius: 10px;
+  opacity: 0;
+  transform: opacity 0.3s ease;
+}
+
+.song-list-container:hover::-webkit-scrollbar-thumb {
+  opacity: 1;
+}
+
+.hidden-list {
+  display: none;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.5s ease-out,
+    max-height 0.5s ease-out;
+}
+
+/* SONG LIST TABLE STYLES */
+#song-list {
+  background-color: rgba(var(--theme-color), 0.1);
+  width: auto;
+  border-collapse: collapse;
+  font-family: inherit;
+  font-size: 14px;
+  color: rgb(var(--theme-color));
+  font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  min-width: 100%;
+}
+
+#song-list thead {
+  background-color: rgba(var(--theme-color), 0.2);
+  color: #fff;
+}
+
+#song-list thead th {
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  background-color: rgba(var(--theme-color), 0.2);
+  color: #fff;
+  padding: 8px 6px;
+}
+
+#song-list th,
+#song-list td {
+  padding: 8px 6px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Table column widths */
+#song-list th:nth-child(1),
+#song-list td:nth-child(1) {
+  /* # */
+  width: 40px;
+  min-width: 40px;
+  max-width: 40px;
+}
+
+#song-list th:nth-child(2),
+#song-list td:nth-child(2) {
+  /* Title / Artist */
+  width: 45%;
+  min-width: 200px;
+}
+
+#song-list th:nth-child(3),
+#song-list td:nth-child(3) {
+  /* Album */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 200px;
+}
+
+#song-list th:nth-child(4),
+#song-list td:nth-child(4) {
+  /* Duration */
+  width: 100px;
+  min-width: 100px;
+  text-align: center;
+}
+
+#song-list th:nth-child(5),
+#song-list td:nth-child(5) {
+  /* Format */
+  width: 70px;
+  min-width: 70px;
+  text-align: center;
+}
+
+/* Song list item styles */
+.list-song-title {
+  font-weight: bold;
+  display: block;
+}
+
+.list-song-artist {
+  font-size: 0.8em;
+  color: #bbb;
+  display: block;
+}
+
+#song-list tr {
+  height: auto;
+  min-height: 50px;
+}
+
+#song-list tr:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+
+tr.active {
+  background-color: rgba(var(--theme-color), 0.3);
+  color: #fff;
+  font-weight: bold;
+}
+
+/*
+   COMMENTED OUT STYLES 
+*/
+
+#song-list th:nth-child(1), #song-list td:nth-child(1) { width: 5%; }  /* # */
+#song-list th:nth-child(2),
+#song-list td:nth-child(2) {
+  width: 35%;
+} /* Title */
+#song-list th:nth-child(3),
+#song-list td:nth-child(3) {
+  width: 25%;
+} /* Artist */
+#song-list th:nth-child(4),
+#song-list td:nth-child(4) {
+  width: 20%;
+} /* Album */
+#song-list th:nth-child(5),
+#song-list td:nth-child(5) {
+  width: 10%;
+} /* Duration */
+#song-list th:nth-child(6),
+#song-list td:nth-child(6) {
+  width: 5%;
+}

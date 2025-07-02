@@ -1,0 +1,10 @@
+@import 'base.css';
+@import 'layout.css';
+
+/* COMPONENTS */
+@import './Components/player.css';
+@import './Components/controls.css';
+@import './Components/add-button.css';
+@import './Components/lyrics.css';
+@import './Components/song-list.css';
+@import './Components/rd-desktop.css';
