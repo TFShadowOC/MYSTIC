@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/MYSTIC/vite.svg" />
+    <meta 
+      name="viewport" 
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>MYSTIC</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css"
+    />
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
+    <script type="module" crossorigin src="/MYSTIC/assets/index-CKsWCwPX.js"></script>
+    <link rel="stylesheet" crossorigin href="/MYSTIC/assets/index-By4ipFXQ.css">
+  </head>
+  <body>
+    <div id="blur-background"></div>
+
+    <div class="main-wrapper">
+      <div class="player-container">
+        <h1>MYSTIC</h1>
+
+        <!-- Cover image -->
+        <div class="album-art-container">
+          <img
+            id="album-art"
+            src="https://placehold.co/200x200?text=No+Cover"
+            alt="Album Art"
+          />
+        </div>
+
+        <!-- SONG INFO -->
+        <div class="song-info">
+          <p id="song-title" class="song-title">No songs loaded</p>
+          <p id="song-artist" class="song-artist"></p>
+        </div>
+
+        <!-- LYRICS BUTTON -->
+        <div class="lyrics">
+          <button id="turn-lyrics">
+            <i id="lyrics-icon" data-lucide="mic-vocal"></i>
+          </button>
+        </div>
+
+        <!-- CONTROLS -->
+        <div class="controls">
+          <button id="prev" class="control-button">
+            <i data-lucide="skip-back"></i>
+          </button>
+          <button id="play-pause" class="control-button">
+            <i data-lucide="play" class="play-icon"></i>
+          </button>
+          <button id="next" class="control-button">
+            <i data-lucide="skip-forward"></i>
+          </button>
+        </div>
+
+        <!--Progress bar-->
+        <input type="range" id="progress-bar" value="0" min="0" max="100" step="1" />
+
+        <!--Time display-->
+        <div class="time-display">
+          <span id="current-time">0:00</span>
+          <span> / </span>
+          <span id="total-duration">0:00</span>
+        </div>
+
+        <!-- File format display -->
+        <div class="file-format-display">
+          <span id="file-format" class="format-badge">MP3 • 320Kbps</span>
+        </div>
+
+        <!--Upload Song-->
+        <div class="add-button-container">
+          <button
+            class="add-button"
+            onclick="document.getElementById('file-input').click()"
+          >
+            +
+          </button>
+          <input type="file" id="file-input" accept="audio/*" multiple />
+        </div>
+
+        <!-- Repeat n Shuffle -->
+        <div class="mode-controls">
+          <button id="toggle-repeat" style="opacity: 0.5">
+            <i
+              id="repeat-icon"
+              class="bi bi-repeat"
+              style="font-size: 24px; font-weight: bold"
+            ></i>
+          </button>
+          <button id="toggle-shuffle">
+            <i
+              id="shuffle-icon"
+              class="bi bi-shuffle"
+              style="font-size: 24px; font-weight: bold"
+            ></i>
+          </button>
+        </div>
+
+        <!-- Hide audio element -->
+        <audio id="audio-player" controls hidden></audio>
+
+        <!-- Lyrics Overlay -->
+        <div id="lyrics-overlay">
+          <div id="lyrics-container"></div>
+            <p id="lyrics-text">No lyrics available</p>
+          </div>
+        </div>
+     
+        <!-- Song List -->
+      <div id="song-list-container" class="song-list-container hidden-list">
+        <table id="song-list">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Title / Artist</th>
+              <th>Album</th>
+              <th>Duration</th>
+            </tr>
+          </thead>
+          <tbody id="song-list-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.8.2/jsmediatags.min.js">
+    </script>
+  </body>
+</html>
